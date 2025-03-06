@@ -50,7 +50,6 @@ func main() {
 		log.Fatal("OBOT_ACCESS_TOKEN environment variable must be set")
 	}
 
-	http.HandleFunc("/slack/command", handleSlackCommand(accessToken))
 	http.HandleFunc("/slack/events", handleSlackEvents(accessToken))
 
 	port := "8088"
@@ -61,69 +60,6 @@ func main() {
 	fmt.Printf("Server starting on port %s...\n", port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
-	}
-}
-
-func handleSlackCommand(accessToken string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		// Parse the form data from Slack
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Failed to parse form data", http.StatusBadRequest)
-			return
-		}
-
-		// Extract values from the Slack command
-		slackPayload := SlackCommandPayload{
-			Text:      r.FormValue("text"),
-			ChannelID: r.FormValue("channel_id"),
-			ThreadTS:  r.FormValue("thread_ts"), // Will be empty if not in a thread
-			UserID:    r.FormValue("user_id"),
-		}
-
-		// Prepare the request body for the Acorn API
-		apiBody := APIRequestBody{
-			THREAD_ID:  slackPayload.ThreadTS,
-			CHANNEL_ID: slackPayload.ChannelID,
-			USER_ID:    slackPayload.UserID,
-			QUERY:      slackPayload.Text,
-		}
-
-		// Convert the body to JSON
-		jsonBody, err := json.Marshal(apiBody)
-		if err != nil {
-			http.Error(w, "Failed to create request body", http.StatusInternalServerError)
-			return
-		}
-
-		// Create the request to the Acorn API
-		apiURL := "https://main.acornlabs.com/api/assistants/a1gnhpr/projects/p17zttl/tasks/w1rzfv8/run?step=*"
-		req, err := http.NewRequest(http.MethodPost, apiURL, bytes.NewBuffer(jsonBody))
-		if err != nil {
-			http.Error(w, "Failed to create API request", http.StatusInternalServerError)
-			return
-		}
-
-		// Set headers
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Cookie", "obot_access_token="+accessToken)
-
-		// Make the request
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			http.Error(w, "Failed to send request to API", http.StatusInternalServerError)
-			return
-		}
-		defer resp.Body.Close()
-
-		// Respond to Slack immediately to avoid timeout
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"response_type": "in_channel"}`))
 	}
 }
 
@@ -173,7 +109,7 @@ func handleSlackEvents(accessToken string) http.HandlerFunc {
 			}
 
 			// Create the request to the Acorn API
-			apiURL := "https://main.acornlabs.com/api/assistants/a1gnhpr/projects/p144lqv/tasks/w1sbtgq/run?step=*"
+			apiURL := "https://main.acornlabs.com/api/assistants/a1gnhpr/projects/p17zttl/tasks/w1rzfv8/run?step=*"
 			req, err := http.NewRequest(http.MethodPost, apiURL, bytes.NewBuffer(jsonBody))
 			if err != nil {
 				http.Error(w, "Failed to create API request", http.StatusInternalServerError)
