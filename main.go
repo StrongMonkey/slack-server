@@ -109,7 +109,7 @@ func handleSlackEvents(accessToken string) http.HandlerFunc {
 			}
 
 			// Create the request to the Acorn API
-			apiURL := "https://main.acornlabs.com/api/assistants/a1gnhpr/projects/p17zttl/tasks/w1sgnmc/run?step=*"
+			apiURL := "https://main.acornlabs.com/api/assistants/a1hl9mr/projects/p12wb9s/tasks/w17rxck/run?step=*"
 			req, err := http.NewRequest(http.MethodPost, apiURL, bytes.NewBuffer(jsonBody))
 			if err != nil {
 				http.Error(w, "Failed to create API request", http.StatusInternalServerError)
