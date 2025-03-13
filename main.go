@@ -35,12 +35,14 @@ type SlackEventPayload struct {
 }
 
 type SlackMessageEvent struct {
-	Type      string `json:"type"`
-	Text      string `json:"text"`
-	ChannelID string `json:"channel"`
-	ThreadTS  string `json:"thread_ts,omitempty"`
-	TS        string `json:"ts"`
-	User      string `json:"user"`
+	Type        string `json:"type"`
+	Text        string `json:"text"`
+	ChannelID   string `json:"channel"`
+	ThreadTS    string `json:"thread_ts,omitempty"`
+	TS          string `json:"ts"`
+	User        string `json:"user"`
+	ChannelType string `json:"channel_type"`
+	BotID       string `json:"bot_id"`
 }
 
 func main() {
@@ -94,7 +96,7 @@ func handleSlackEvents(accessToken string) http.HandlerFunc {
 		}
 
 		// Handle message events
-		if payload.Type == "event_callback" && payload.Event.Type == "app_mention" {
+		if payload.Type == "event_callback" && (payload.Event.Type == "app_mention" || (payload.Event.ChannelType == "im" && payload.Event.Type == "message" && payload.Event.BotID == "")) {
 			// Prepare the request body for the Acorn API
 			apiBody := APIRequestBody{
 				THREAD_ID:  payload.Event.ThreadTS,
