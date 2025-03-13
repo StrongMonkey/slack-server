@@ -52,7 +52,9 @@ func main() {
 		log.Fatal("OBOT_ACCESS_TOKEN environment variable must be set")
 	}
 
-	http.HandleFunc("/slack/events", handleSlackEvents(accessToken))
+	taskAPI := os.Getenv("TASK_API_URL")
+
+	http.HandleFunc("/slack/events", handleSlackEvents(accessToken, taskAPI))
 
 	port := "8088"
 	if envPort := os.Getenv("PORT"); envPort != "" {
@@ -65,7 +67,7 @@ func main() {
 	}
 }
 
-func handleSlackEvents(accessToken string) http.HandlerFunc {
+func handleSlackEvents(accessToken string, taskAPI string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -122,7 +124,7 @@ func handleSlackEvents(accessToken string) http.HandlerFunc {
 			}
 
 			// Create the request to the Acorn API
-			apiURL := "https://main.acornlabs.com/api/assistants/a1hl9mr/projects/p12wb9s/tasks/w17rxck/run?step=*"
+			apiURL := taskAPI
 			req, err := http.NewRequest(http.MethodPost, apiURL, bytes.NewBuffer(jsonBody))
 			if err != nil {
 				http.Error(w, "Failed to create API request", http.StatusInternalServerError)
