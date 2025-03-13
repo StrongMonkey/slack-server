@@ -70,9 +70,16 @@ func handleSlackEvents(accessToken string) http.HandlerFunc {
 			return
 		}
 
+		rawEventData, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+			return
+		}
+		log.Printf("Raw event data: %s", string(rawEventData))
+
 		// Read the request body
 		var payload SlackEventPayload
-		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		if err := json.Unmarshal(rawEventData, &payload); err != nil {
 			http.Error(w, "Failed to parse request body", http.StatusBadRequest)
 			return
 		}
