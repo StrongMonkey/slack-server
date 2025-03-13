@@ -110,6 +110,10 @@ func handleSlackEvents(accessToken string) http.HandlerFunc {
 				apiBody.THREAD_ID = payload.Event.TS
 			}
 
+			if payload.Event.ChannelType == "im" {
+				apiBody.THREAD_ID = ""
+			}
+
 			// Convert the body to JSON
 			jsonBody, err := json.Marshal(apiBody)
 			if err != nil {
