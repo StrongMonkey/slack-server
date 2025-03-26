@@ -98,7 +98,7 @@ func handleSlackEvents(accessToken string, taskAPI string) http.HandlerFunc {
 		}
 
 		// Handle message events
-		if payload.Type == "event_callback" && (payload.Event.Type == "app_mention" || (payload.Event.ChannelType == "im" && payload.Event.Type == "message" && payload.Event.BotID == "")) {
+		if payload.Type == "event_callback" && (payload.Event.Type == "app_mention" || (payload.Event.ChannelType == "im" && payload.Event.Type == "message") && payload.Event.BotID == "") {
 			// Prepare the request body for the Acorn API
 			apiBody := APIRequestBody{
 				THREAD_ID:  payload.Event.ThreadTS,
