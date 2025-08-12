@@ -99,25 +99,8 @@ func handleSlackEvents(accessToken string, taskAPI string) http.HandlerFunc {
 
 		// Handle message events
 		if payload.Type == "event_callback" && (payload.Event.Type == "app_mention" || (payload.Event.ChannelType == "im" && payload.Event.Type == "message") && payload.Event.BotID == "") {
-			// Prepare the request body for the Acorn API
-			apiBody := APIRequestBody{
-				THREAD_ID:  payload.Event.ThreadTS,
-				CHANNEL_ID: payload.Event.ChannelID,
-				USER_ID:    payload.Event.User,
-				QUERY:      payload.Event.Text,
-			}
-
-			// If message is not in a thread, use the message TS as thread ID
-			if apiBody.THREAD_ID == "" {
-				apiBody.THREAD_ID = payload.Event.TS
-			}
-
-			if payload.Event.ChannelType == "im" {
-				apiBody.THREAD_ID = ""
-			}
-
-			// Convert the body to JSON
-			jsonBody, err := json.Marshal(apiBody)
+			// Convert the entire payload to JSON
+			jsonBody, err := json.Marshal(payload)
 			if err != nil {
 				http.Error(w, "Failed to create request body", http.StatusInternalServerError)
 				return
